@@ -39,9 +39,9 @@
       });
 
       const data = await res.json();
+      console.log("DATA REÇUE :", data);
 
-      // Sécurise l'accès aux données
-      const user = data.data || data;
+      const user = data.user || data.data || data;
 
       document.body.innerHTML = `
         <h2>Bienvenue ${user.display_name || user.login} !</h2>
@@ -54,4 +54,3 @@
 
 </body>
 </html>
-
