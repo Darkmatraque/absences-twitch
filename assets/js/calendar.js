@@ -42,6 +42,7 @@ async function toggleAbsence(hour) {
 
   // Vérifier si l'absence existe déjà
   const { data: rows, error: selectError } = await db
+    console.log("SELECT rows:", rows);
     .from("absences")
     .select("id")
     .eq("user_id", currentUser.id)
