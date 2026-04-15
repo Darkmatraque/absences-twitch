@@ -6,12 +6,35 @@ if (!currentUser) {
   console.error("Aucun utilisateur trouvé dans localStorage.");
 }
 
-// --- Date locale sans décalage (important pour DELETE) ---
-function getToday() {
-  const d = new Date();
+// --- Date locale sans décalage ---
+function formatDate(d) {
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
   return d.toISOString().split("T")[0];
 }
+
+let currentDate = formatDate(new Date());
+
+// --- Mise à jour de l'affichage de la date ---
+function updateDateDisplay() {
+  document.getElementById("current-date").textContent = currentDate;
+}
+
+// --- Navigation entre les jours ---
+document.getElementById("prev-day").addEventListener("click", () => {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() - 1);
+  currentDate = formatDate(d);
+  updateDateDisplay();
+  loadAbsences();
+});
+
+document.getElementById("next-day").addEventListener("click", () => {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() + 1);
+  currentDate = formatDate(d);
+  updateDateDisplay();
+  loadAbsences();
+});
 
 // --- Génération des créneaux horaires ---
 const calendar = document.getElementById("calendar");
@@ -38,77 +61,44 @@ for (let h = 0; h < 24; h++) {
 
 // --- Ajouter / retirer une absence ---
 async function toggleAbsence(hour) {
-  const today = getToday();
-
-  // Vérifier si l'absence existe déjà
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("*")
     .eq("user_id", currentUser.id)
-    .eq("date", today)
+    .eq("date", currentDate)
     .eq("hour", hour);
 
   console.log("SELECT rows:", rows);
 
-  if (selectError) {
-    console.error("Erreur SELECT :", selectError);
-    return;
-  }
+  if (selectError) return console.error(selectError);
 
-  // --- Si l'absence existe → supprimer ---
   if (rows.length > 0) {
-    const { error: deleteError } = await db
-      .from("absences")
-      .delete()
-      .eq("id", rows[0].id);
-
-    if (deleteError) {
-      console.error("Erreur DELETE :", deleteError);
-      return;
-    }
-
+    await db.from("absences").delete().eq("id", rows[0].id);
     console.log("Absence supprimée !");
-  }
-
-  // --- Sinon → ajouter ---
-  else {
-    const { error: insertError } = await db.from("absences").insert({
+  } else {
+    await db.from("absences").insert({
       user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
       hour: hour,
-      date: today
+      date: currentDate
     });
-
-    if (insertError) {
-      console.error("Erreur INSERT :", insertError);
-      return;
-    }
-
     console.log("Absence ajoutée !");
   }
 
-  await loadAbsences();
+  loadAbsences();
 }
 
 // --- Charger les absences du jour ---
 async function loadAbsences() {
-  const today = getToday();
-
-  // Reset visuel
-  document.querySelectorAll(".absence-list").forEach(list => {
-    list.innerHTML = "";
-  });
+  document.querySelectorAll(".absence-list").forEach(list => list.innerHTML = "");
 
   const { data, error } = await db
     .from("absences")
     .select("*")
-    .eq("date", today);
+    .eq("date", currentDate);
 
-  if (error) {
-    console.error("Erreur loadAbsences:", error);
-    return;
-  }
+  if (error) return console.error(error);
 
   data.forEach(abs => {
     const slot = document.querySelector(`.time-slot[data-hour="${abs.hour}"]`);
@@ -132,4 +122,5 @@ async function loadAbsences() {
   });
 }
 
+updateDateDisplay();
 loadAbsences();
