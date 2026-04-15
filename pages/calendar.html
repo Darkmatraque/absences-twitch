@@ -7,6 +7,7 @@
 </head>
 <body>
 
+  <!-- Affichage du user connecté -->
   <div id="user-info" style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
     <img id="avatar" src="" width="50" style="border-radius:50%; display:none;">
     <span id="username" style="font-size:20px; font-weight:bold;"></span>
@@ -16,24 +17,31 @@
 
   <div class="calendar-container" id="calendar"></div>
 
+  <!-- Chargement du user + redirection si non connecté -->
   <script>
-    // Récupération du user stocké dans localStorage
     const user = JSON.parse(localStorage.getItem("twitchUser"));
 
-    // Si aucun user → retour à la page de login
     if (!user) {
       window.location.href = "index.html";
     }
 
-    // Affichage du pseudo
     document.getElementById("username").textContent = user.display_name || user.login;
 
-    // Affichage de l’avatar
     const avatar = document.getElementById("avatar");
     avatar.src = user.profile_image_url;
     avatar.style.display = "block";
   </script>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = supabase.createClient(
+      "https://lzstepzavvprxhvoajhd.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6c3RlcHphdnZwcnhodm9hamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTY4NTYsImV4cCI6MjA5MTc3Mjg1Nn0.G6tyqKMi3LIutDvCAeGKZ0aaTar53jUBsszIvuWcBNs"
+    );
+  </script>
+
+  <!-- Script du calendrier -->
   <script src="../assets/js/calendar.js"></script>
 
 </body>
