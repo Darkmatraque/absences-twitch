@@ -24,6 +24,30 @@ h1 {
 }
 
 /* -------------------------------------------------- */
+/*                HEADER UTILISATEUR                  */
+/* -------------------------------------------------- */
+
+#user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px;
+}
+
+#user-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff4fd8aa;
+}
+
+#username {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffbdf3;
+}
+
+/* -------------------------------------------------- */
 /*                CONTENEUR CALENDRIER                */
 /* -------------------------------------------------- */
 
@@ -75,24 +99,36 @@ h1 {
 }
 
 /* -------------------------------------------------- */
+/*                CONTENU DU CALENDRIER               */
+/* -------------------------------------------------- */
+
+#calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* -------------------------------------------------- */
 /*                CRÉNEAUX HORAIRES                   */
 /* -------------------------------------------------- */
 
 .time-slot {
   display: flex;
   align-items: center;
-  padding: 12px;
+  justify-content: space-between;
+  padding: 14px 18px;
   margin: 6px 0;
-  border-radius: 8px;
-  background: #1d1d27;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1d1d27, #15151d);
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.25s;
   border: 1px solid #ff4fd833;
 }
 
 .time-slot:hover {
   background: #ff4fd822;
-  box-shadow: 0 0 10px #ff4fd8;
+  box-shadow: 0 0 12px #ff4fd8;
+  transform: translateX(4px);
 }
 
 .hour-label {
@@ -119,50 +155,63 @@ h1 {
 .absence-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #222;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid #444;
+  gap: 10px;
+  background: #1b1b24;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid #333;
   transition: 0.2s;
 }
 
 .absence-item:hover {
-  background: #2c2c36;
+  background: #262631;
 }
 
 .absence-item.me {
   border-color: #ff4fd8;
-  box-shadow: 0 0 12px #ff4fd8;
+  box-shadow: 0 0 14px #ff4fd8;
 }
 
 /* Avatar */
 .absence-avatar {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
+  border: 2px solid #ff4fd8;
+  box-shadow: 0 0 8px #ff4fd8aa;
 }
 
 /* -------------------------------------------------- */
-/*                HEADER UTILISATEUR                  */
+/*                    RESPONSIVE                      */
 /* -------------------------------------------------- */
 
-#user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 20px;
-}
+@media (max-width: 600px) {
+  .calendar-container {
+    width: 95%;
+    padding: 15px;
+  }
 
-#user-info img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #ff4fd8aa;
-}
+  .time-slot {
+    padding: 10px;
+  }
 
-#username {
-  font-size: 20px;
-  font-weight: bold;
-  color: #ffbdf3;
+  .hour-label {
+    width: 55px;
+    font-size: 16px;
+  }
+
+  #date-nav {
+    font-size: 16px;
+    gap: 10px;
+  }
+
+  #date-nav button {
+    padding: 6px 10px;
+    font-size: 16px;
+  }
+
+  .absence-avatar {
+    width: 28px;
+    height: 28px;
+  }
 }
