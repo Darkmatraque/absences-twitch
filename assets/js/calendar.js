@@ -1,3 +1,5 @@
+console.log("CALENDAR JS LOADED"); // 🔥 DEBUG : vérifie que ton JS est chargé
+
 // --- Récupération de l'utilisateur courant ---
 const currentUser = JSON.parse(localStorage.getItem("twitchUser"));
 if (!currentUser) {
