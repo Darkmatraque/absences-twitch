@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Calendrier des absences</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
@@ -32,18 +32,17 @@
     avatar.style.display = "block";
   </script>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const db = supabase.createClient(
-    "https://lzstepzavvprxhvoajhd.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6c3RlcHphdnZwcnhodm9hamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTY4NTYsImV4cCI6MjA5MTc3Mjg1Nn0.G6tyqKMi3LIutDvCAeGKZ0aaTar53jUBsszIvuWcBNs"
-  );
-</script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const db = supabase.createClient(
+      "https://lzstepzavvprxhvoajhd.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6c3RlcHphdnZwcnhodm9hamhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxOTY4NTYsImV4cCI6MjA5MTc3Mjg1Nn0.G6tyqKMi3LIutDvCAeGKZ0aaTar53jUBsszIvuWcBNs"
+    );
+  </script>
 
-
-  <!-- Script du calendrier -->
-  <script src="../assets/js/calendar.js"></script>
+  <!-- Script du calendrier (CHEMIN CORRIGÉ) -->
+  <script src="assets/js/calendar.js"></script>
 
 </body>
 </html>
