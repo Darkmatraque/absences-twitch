@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion en cours...</title>
+  <style>
+    body {
+      background: #0e0e10;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Connexion en cours...</h2>
+
+  <script>
+    async function run() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (!code) {
+        document.body.innerHTML = "<h2>Erreur : aucun code reçu.</h2>";
+        return;
+      }
+
+      // URL de ta fonction Supabase
+      const functionUrl = "https://lzstepzavvprxhvoajhd.functions.supabase.co/twitch-auth";
+
+      const res = await fetch(functionUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await res.json();
+
+      document.body.innerHTML = `
+        <h2>Bienvenue ${data.display_name} !</h2>
+        <img src="${data.profile_image_url}" width="120" style="border-radius:50%">
+      `;
+    }
+
+    run();
+  </script>
+
+</body>
+</html>
