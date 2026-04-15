@@ -4,21 +4,33 @@
   <meta charset="UTF-8">
   <title>Calendrier des absences</title>
 
-  <!-- CSS correct -->
+  <!-- CSS -->
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
   <!-- User connecté -->
-  <div id="user-info" style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
-    <img id="avatar" src="" width="50" style="border-radius:50%; display:none;">
-    <span id="username" style="font-size:20px; font-weight:bold;"></span>
+  <div id="user-info">
+    <img id="avatar" src="" style="display:none;">
+    <span id="username"></span>
   </div>
 
   <h1>Calendrier des absences</h1>
 
-  <!-- Conteneur du calendrier -->
-  <div class="calendar-container" id="calendar"></div>
+  <!-- CONTENEUR GLOBAL -->
+  <div class="calendar-container">
+
+    <!-- NAVIGATION DE DATE -->
+    <div id="date-nav">
+      <button id="prev-day">◀</button>
+      <span id="current-date"></span>
+      <button id="next-day">▶</button>
+    </div>
+
+    <!-- CALENDRIER -->
+    <div id="calendar"></div>
+
+  </div>
 
   <!-- Chargement du user -->
   <script>
