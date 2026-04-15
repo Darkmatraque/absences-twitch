@@ -1,6 +1,6 @@
-/* ------------------------------ */
-/*        STYLE GLOBAL            */
-/* ------------------------------ */
+/* -------------------------------------------------- */
+/*                   STYLE GLOBAL                     */
+/* -------------------------------------------------- */
 
 body {
   background: #0a0a0f;
@@ -10,9 +10,9 @@ body {
   padding: 0;
 }
 
-/* ------------------------------ */
-/*            TITRE               */
-/* ------------------------------ */
+/* -------------------------------------------------- */
+/*                      TITRE                          */
+/* -------------------------------------------------- */
 
 h1 {
   text-align: center;
@@ -23,9 +23,9 @@ h1 {
   letter-spacing: 1px;
 }
 
-/* ------------------------------ */
-/*      CONTENEUR CALENDRIER      */
-/* ------------------------------ */
+/* -------------------------------------------------- */
+/*                CONTENEUR CALENDRIER                */
+/* -------------------------------------------------- */
 
 .calendar-container {
   width: 90%;
@@ -34,15 +34,53 @@ h1 {
   background: #14141c;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 0 25px #ff4fd8aa;
+  box-shadow: 0 0 25px #ff4fd855;
+  border: 1px solid #ff4fd822;
 }
 
-/* ------------------------------ */
-/*        CRÉNEAUX HORAIRES       */
-/* ------------------------------ */
+/* -------------------------------------------------- */
+/*                NAVIGATION DE DATE                  */
+/* -------------------------------------------------- */
 
-.hour,
+#date-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  font-size: 20px;
+}
+
+#date-nav button {
+  background: #ff4fd8;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s;
+  box-shadow: 0 0 10px #ff4fd8aa;
+}
+
+#date-nav button:hover {
+  background: #ff7ae6;
+  box-shadow: 0 0 15px #ff4fd8;
+}
+
+#current-date {
+  font-weight: bold;
+  color: #ffbdf3;
+  text-shadow: 0 0 8px #ff4fd8;
+}
+
+/* -------------------------------------------------- */
+/*                CRÉNEAUX HORAIRES                   */
+/* -------------------------------------------------- */
+
 .time-slot {
+  display: flex;
+  align-items: center;
   padding: 12px;
   margin: 6px 0;
   border-radius: 8px;
@@ -50,43 +88,64 @@ h1 {
   cursor: pointer;
   transition: 0.2s;
   border: 1px solid #ff4fd833;
-  font-size: 18px;
 }
 
-.hour:hover,
 .time-slot:hover {
   background: #ff4fd822;
   box-shadow: 0 0 10px #ff4fd8;
 }
 
-/* ------------------------------ */
-/*      ÉTAT : ABSENCE            */
-/* ------------------------------ */
-
-.time-slot.absent {
-  background: #ff4fd8;
-  color: #000;
+.hour-label {
+  width: 70px;
   font-weight: bold;
-  box-shadow: 0 0 15px #ff4fd8;
-  border-color: #ff4fd8;
+  color: #bbb;
+  font-size: 18px;
 }
 
-/* Bloc interne quand absent */
-.absence-block {
+/* -------------------------------------------------- */
+/*                LISTE DES ABSENCES                  */
+/* -------------------------------------------------- */
+
+.absence-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* -------------------------------------------------- */
+/*                BLOC D'ABSENCE                      */
+/* -------------------------------------------------- */
+
+.absence-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  background: #222;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  transition: 0.2s;
 }
 
+.absence-item:hover {
+  background: #2c2c36;
+}
+
+.absence-item.me {
+  border-color: #ff4fd8;
+  box-shadow: 0 0 12px #ff4fd8;
+}
+
+/* Avatar */
 .absence-avatar {
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
 }
 
-/* ------------------------------ */
-/*      HEADER UTILISATEUR        */
-/* ------------------------------ */
+/* -------------------------------------------------- */
+/*                HEADER UTILISATEUR                  */
+/* -------------------------------------------------- */
 
 #user-info {
   display: flex;
@@ -99,9 +158,11 @@ h1 {
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  box-shadow: 0 0 10px #ff4fd8aa;
 }
 
 #username {
   font-size: 20px;
   font-weight: bold;
+  color: #ffbdf3;
 }
