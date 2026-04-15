@@ -20,22 +20,25 @@ async function toggleAbsence(slot) {
   const hour = parseInt(slot.dataset.hour);
   const today = new Date().toISOString().slice(0, 10);
 
-  // Si déjà absent → supprimer dans Supabase
-  if (slot.classList.contains("absent")) {
+  // Vérifier si CET utilisateur est déjà absent à CETTE heure
+  const { data: existing } = await db
+    .from("absences")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("hour", hour)
+    .eq("date", today)
+    .maybeSingle();
+
+  // Si déjà absent → supprimer UNIQUEMENT sa ligne
+  if (existing) {
     slot.classList.remove("absent");
     slot.innerHTML = slot.dataset.hour.padStart(2, "0") + ":00";
 
-    await db
-      .from("absences")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("hour", hour)
-      .eq("date", today);
-
+    await db.from("absences").delete().eq("id", existing.id);
     return;
   }
 
-  // Sinon → ajouter dans Supabase
+  // Sinon → ajouter une absence
   slot.classList.add("absent");
   slot.innerHTML = `
     <div class="absence-block">
