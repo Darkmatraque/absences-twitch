@@ -20,15 +20,27 @@
   <!-- CONTENEUR GLOBAL -->
   <div class="calendar-container">
 
-    <!-- NAVIGATION DE DATE -->
-    <div id="date-nav">
-      <button id="prev-day">◀</button>
-      <span id="current-date"></span>
-      <button id="next-day">▶</button>
+    <!-- NAVIGATION DE SEMAINE -->
+    <div id="week-nav">
+      <button id="prev-week">◀ Semaine précédente</button>
+      <span id="current-week"></span>
+      <button id="next-week">Semaine suivante ▶</button>
     </div>
 
-    <!-- CALENDRIER -->
-    <div id="calendar"></div>
+    <!-- EN-TÊTES DES JOURS -->
+    <div class="calendar-header">
+      <div class="calendar-cell hour-header"></div>
+      <div class="calendar-cell day-header" data-day-index="0"></div>
+      <div class="calendar-cell day-header" data-day-index="1"></div>
+      <div class="calendar-cell day-header" data-day-index="2"></div>
+      <div class="calendar-cell day-header" data-day-index="3"></div>
+      <div class="calendar-cell day-header" data-day-index="4"></div>
+      <div class="calendar-cell day-header" data-day-index="5"></div>
+      <div class="calendar-cell day-header" data-day-index="6"></div>
+    </div>
+
+    <!-- GRILLE HEBDOMADAIRE -->
+    <div id="calendar" class="calendar-grid"></div>
 
   </div>
 
