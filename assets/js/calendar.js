@@ -9,7 +9,7 @@ if (!currentUser) {
 }
 
 // --------------------------------------------------
-//  GESTION DE LA DATE COURANTE
+//  FORMATAGE DATE LOCALE (YYYY-MM-DD)
 // --------------------------------------------------
 function formatDateLocal(date) {
   const d = new Date(date);
@@ -20,11 +20,35 @@ function formatDateLocal(date) {
 let currentDate = formatDateLocal(new Date());
 
 // --------------------------------------------------
+//  FORMATAGE DATE HUMAINE (Mercredi 15 avril)
+// --------------------------------------------------
+function formatDateHuman(dateString) {
+  const date = new Date(dateString + "T00:00:00");
+
+  const jours = [
+    "Dimanche", "Lundi", "Mardi", "Mercredi",
+    "Jeudi", "Vendredi", "Samedi"
+  ];
+
+  const mois = [
+    "janvier", "février", "mars", "avril",
+    "mai", "juin", "juillet", "août",
+    "septembre", "octobre", "novembre", "décembre"
+  ];
+
+  const jourSemaine = jours[date.getDay()];
+  const jour = date.getDate();
+  const moisNom = mois[date.getMonth()];
+
+  return `${jourSemaine} ${jour} ${moisNom}`;
+}
+
+// --------------------------------------------------
 //  AFFICHAGE DE LA DATE
 // --------------------------------------------------
 function updateDateDisplay() {
   const dateEl = document.getElementById("current-date");
-  if (dateEl) dateEl.textContent = currentDate;
+  if (dateEl) dateEl.textContent = formatDateHuman(currentDate);
 }
 
 // --------------------------------------------------
