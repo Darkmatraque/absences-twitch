@@ -25,7 +25,7 @@ async function toggleAbsence(slot) {
     slot.classList.remove("absent");
     slot.innerHTML = slot.dataset.hour.padStart(2, "0") + ":00";
 
-    await supabase
+    await db
       .from("absences")
       .delete()
       .eq("user_id", user.id)
@@ -44,7 +44,7 @@ async function toggleAbsence(slot) {
     </div>
   `;
 
-  await supabase.from("absences").insert({
+  await db.from("absences").insert({
     user_id: user.id,
     username: user.display_name || user.login,
     avatar: user.profile_image_url,
@@ -57,7 +57,7 @@ async function toggleAbsence(slot) {
 async function loadAbsences() {
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("absences")
     .select("*")
     .eq("date", today);
