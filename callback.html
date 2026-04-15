@@ -30,10 +30,7 @@
         return;
       }
 
-      // URL de ta fonction Supabase
-     const functionUrl = "https://lzstepzavvprxhvoajhd.supabase.co/functions/v1/twitch-auth";
-
-
+      const functionUrl = "https://lzstepzavvprxhvoajhd.supabase.co/functions/v1/twitch-auth";
 
       const res = await fetch(functionUrl, {
         method: "POST",
@@ -43,9 +40,12 @@
 
       const data = await res.json();
 
+      // Sécurise l'accès aux données
+      const user = data.data || data;
+
       document.body.innerHTML = `
-        <h2>Bienvenue ${data.display_name} !</h2>
-        <img src="${data.profile_image_url}" width="120" style="border-radius:50%">
+        <h2>Bienvenue ${user.display_name || user.login} !</h2>
+        <img src="${user.profile_image_url}" width="120" style="border-radius:50%">
       `;
     }
 
@@ -54,3 +54,4 @@
 
 </body>
 </html>
+
