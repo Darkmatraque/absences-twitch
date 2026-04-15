@@ -57,10 +57,15 @@ async function toggleAbsence(slot) {
 async function loadAbsences() {
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("absences")
     .select("*")
     .eq("date", today);
+
+  if (error) {
+    console.error("Erreur Supabase :", error);
+    return;
+  }
 
   data.forEach(abs => {
     const slot = document.querySelector(`.time-slot[data-hour="${abs.hour}"]`);
