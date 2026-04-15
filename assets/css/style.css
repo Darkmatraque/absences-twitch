@@ -1,0 +1,46 @@
+body {
+  background: #0a0a0f;
+  color: #fff;
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 30px;
+  color: #ff4fd8;
+  text-shadow: 0 0 15px #ff4fd8;
+}
+
+.calendar-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 40px auto;
+  background: #14141c;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px #ff4fd8aa;
+}
+
+.hour {
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  background: #1d1d27;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid #ff4fd833;
+}
+
+.hour:hover {
+  background: #ff4fd822;
+  box-shadow: 0 0 10px #ff4fd8;
+}
+
+.hour.selected {
+  background: #ff4fd8;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 15px #ff4fd8;
+}
