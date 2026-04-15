@@ -111,16 +111,6 @@ h1 {
   align-items: stretch;
 }
 
-.calendar-cell {
-  padding: 8px 10px;
-  font-size: 14px;
-}
-
-.hour-header {
-  color: #888;
-  font-size: 13px;
-}
-
 .day-header {
   text-align: center;
   font-weight: 600;
@@ -129,6 +119,8 @@ h1 {
   border-radius: 8px 8px 0 0;
   border: 1px solid #2f2f45;
   border-bottom: none;
+  padding: 10px 5px;
+  white-space: nowrap;
 }
 
 /* -------------------------------------------------- */
@@ -153,15 +145,24 @@ h1 {
   border-bottom: 1px solid #1f1f2b;
 }
 
-/* Cellule jour/heure */
+/* -------------------------------------------------- */
+/*                CELLULE JOUR / HEURE                */
+/* -------------------------------------------------- */
+
 .day-slot {
   position: relative;
   min-height: 40px;
+  max-height: 40px;      /* empêche la case de grandir */
+  overflow: hidden;      /* empêche le contenu de dépasser */
   border-left: 1px solid #1f1f2b;
   border-bottom: 1px solid #1f1f2b;
-  padding: 4px;
+  padding: 0;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
+
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centre le contenu */
 }
 
 .day-slot:hover {
@@ -178,13 +179,15 @@ h1 {
   align-items: center;
   gap: 6px;
   background: #1f1f2b;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 8px;
   border: 1px solid #33334a;
-  font-size: 12px;
+  font-size: 11px;
   color: #f5f5f7;
   max-width: 100%;
   box-shadow: 0 0 8px #000;
+
+  transform: scale(0.85); /* pour tenir dans 40px */
 }
 
 .absence-item.me {
@@ -194,17 +197,17 @@ h1 {
 
 /* Avatar */
 .absence-avatar {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 /* Badge ABSENT */
 .absence-badge {
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
-  padding: 2px 6px;
+  padding: 1px 5px;
   border-radius: 999px;
   font-weight: 700;
   letter-spacing: 0.05em;
