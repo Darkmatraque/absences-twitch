@@ -37,13 +37,12 @@ for (let h = 0; h < 24; h++) {
 // --- Fonction pour ajouter / retirer une absence ---
 async function toggleAbsence(hour) {
   const today = getToday();
-  const twitchId = String(currentUser.id); // 🔥 IMPORTANT
 
   // Vérifier si l'absence existe déjà
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("id")
-    .eq("twitch_id", twitchId)
+    .eq("user_id", currentUser.id)   // 🔥 correspond à TA table
     .eq("date", today)
     .eq("hour", hour);
 
@@ -70,10 +69,9 @@ async function toggleAbsence(hour) {
   // --- Sinon → ajouter ---
   else {
     const { error: insertError } = await db.from("absences").insert({
-      twitch_id: twitchId,
-      login: currentUser.login,
-      display_name: currentUser.display_name,
-      profile_image_url: currentUser.profile_image_url,
+      user_id: currentUser.id, // 🔥 correspond à TA table
+      username: currentUser.display_name || currentUser.login,
+      avatar: currentUser.profile_image_url,
       hour: hour,
       date: today
     });
@@ -94,6 +92,7 @@ async function toggleAbsence(hour) {
 async function loadAbsences() {
   const today = getToday();
 
+  // Reset visuel
   document.querySelectorAll(".absence-list").forEach(list => {
     list.innerHTML = "";
   });
@@ -118,11 +117,11 @@ async function loadAbsences() {
     item.classList.add("absence-item");
 
     item.innerHTML = `
-      <img src="${abs.profile_image_url}" class="absence-avatar">
-      <span>${abs.display_name || abs.login}</span>
+      <img src="${abs.avatar}" class="absence-avatar">
+      <span>${abs.username}</span>
     `;
 
-    if (String(abs.twitch_id) === String(currentUser.id)) {
+    if (String(abs.user_id) === String(currentUser.id)) {
       item.classList.add("me");
     }
 
