@@ -48,6 +48,11 @@
         <h2>Bienvenue ${user.display_name || user.login} !</h2>
         <img src="${user.profile_image_url}" width="120" style="border-radius:50%">
       `;
+
+      // Redirection après 1 seconde
+      setTimeout(() => {
+        window.location.href = "calendrier.html";
+      }, 1000);
     }
 
     run();
@@ -55,3 +60,4 @@
 
 </body>
 </html>
+
