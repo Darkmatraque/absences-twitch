@@ -29,8 +29,7 @@ for (let h = 0; h < 24; h++) {
 
 // Clique sur un créneau
 async function toggleAbsence(hour) {
-  const today = new Date().toLocaleDateString("fr-CA");
-
+  const today = new Date().toLocaleDateString("fr-CA"); // 🔥 FIX DATE
 
   // On récupère TOUTES les absences de CET utilisateur à CETTE heure
   const { data: rows, error: selectError } = await db
@@ -78,7 +77,7 @@ async function toggleAbsence(hour) {
 
 // Recharge toutes les absences du jour
 async function loadAbsences() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString("fr-CA"); // 🔥 FIX DATE
 
   // Reset visuel
   document.querySelectorAll(".absence-list").forEach(list => {
