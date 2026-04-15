@@ -1,7 +1,7 @@
 // Récupération de l'utilisateur courant
 const currentUser = JSON.parse(localStorage.getItem("twitchUser"));
 if (!currentUser) {
-  console.error("Aucun utilisateur trouvé.");
+  console.error("Aucun utilisateur trouvé dans localStorage (twitchUser).");
 }
 
 // Génération des créneaux horaires
@@ -12,29 +12,29 @@ for (let h = 0; h < 24; h++) {
   slot.classList.add("time-slot");
   slot.dataset.hour = h;
 
-  // Conteneur pour afficher plusieurs absents
-  const list = document.createElement("div");
-  list.classList.add("absence-list");
-
   const label = document.createElement("div");
   label.classList.add("hour-label");
   label.textContent = String(h).padStart(2, "0") + ":00";
 
+  const list = document.createElement("div");
+  list.classList.add("absence-list");
+
   slot.appendChild(label);
   slot.appendChild(list);
 
-  slot.addEventListener("click", () => toggleAbsence(slot));
+  slot.addEventListener("click", () => toggleAbsence(h));
 
   calendar.appendChild(slot);
 }
 
-// Ajouter / retirer une absence (POUR L'UTILISATEUR COURANT)
-async function toggleAbsence(slot) {
-  const hour = parseInt(slot.dataset.hour);
+// Clique sur un créneau
+async function toggleAbsence(hour) {
+  if (!currentUser) return;
+
   const today = new Date().toISOString().slice(0, 10);
 
-  // Vérifier si CET utilisateur est déjà absent à CETTE heure
-  const { data: existing } = await supabase
+  // Est-ce que CET utilisateur est déjà absent à CETTE heure ?
+  const { data: existing, error: selectError } = await supabase
     .from("absences")
     .select("*")
     .eq("user_id", currentUser.id)
@@ -42,70 +42,66 @@ async function toggleAbsence(slot) {
     .eq("date", today)
     .maybeSingle();
 
-  // Si déjà absent → supprimer UNIQUEMENT sa ligne
-  if (existing) {
-    await supabase.from("absences").delete().eq("id", existing.id);
-    await refreshSlot(hour);
+  if (selectError && selectError.code !== "PGRST116") {
+    console.error("Erreur select:", selectError);
     return;
   }
 
-  // Sinon → ajouter une absence
-  await supabase.from("absences").insert({
-    user_id: currentUser.id,
-    username: currentUser.display_name || currentUser.login,
-    avatar: currentUser.profile_image_url,
-    hour: hour,
-    date: today
-  });
+  // Si déjà absent → on supprime SA ligne
+  if (existing) {
+    const { error: deleteError } = await supabase
+      .from("absences")
+      .delete()
+      .eq("id", existing.id);
 
-  await refreshSlot(hour);
-}
-
-// Rafraîchir l'affichage d'un créneau (montre TOUT LE MONDE)
-async function refreshSlot(hour) {
-  const slot = document.querySelector(`.time-slot[data-hour="${hour}"]`);
-  const list = slot.querySelector(".absence-list");
-  list.innerHTML = ""; // reset
-
-  const today = new Date().toISOString().slice(0, 10);
-
-  const { data } = await supabase
-    .from("absences")
-    .select("*")
-    .eq("hour", hour)
-    .eq("date", today);
-
-  data.forEach(abs => {
-    const item = document.createElement("div");
-    item.classList.add("absence-item");
-
-    item.innerHTML = `
-      <img src="${abs.avatar}" class="absence-avatar">
-      <span>${abs.username}</span>
-    `;
-
-    // On marque visuellement l'absence du user courant
-    if (abs.user_id === currentUser.id) {
-      item.classList.add("me");
+    if (deleteError) {
+      console.error("Erreur delete:", deleteError);
+      return;
     }
+  } else {
+    // Sinon → on ajoute
+    const { error: insertError } = await supabase.from("absences").insert({
+      user_id: currentUser.id,
+      username: currentUser.display_name || currentUser.login,
+      avatar: currentUser.profile_image_url,
+      hour: hour,
+      date: today
+    });
 
-    list.appendChild(item);
-  });
+    if (insertError) {
+      console.error("Erreur insert:", insertError);
+      return;
+    }
+  }
+
+  // On recharge tout l'affichage après chaque action
+  await loadAbsences();
 }
 
-// Charger toutes les absences au démarrage
+// Recharge toutes les absences du jour
 async function loadAbsences() {
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data } = await supabase
+  // Reset visuel
+  document.querySelectorAll(".absence-list").forEach(list => {
+    list.innerHTML = "";
+  });
+
+  const { data, error } = await supabase
     .from("absences")
     .select("*")
     .eq("date", today);
 
+  if (error) {
+    console.error("Erreur loadAbsences:", error);
+    return;
+  }
+
   data.forEach(abs => {
     const slot = document.querySelector(`.time-slot[data-hour="${abs.hour}"]`);
-    const list = slot.querySelector(".absence-list");
+    if (!slot) return;
 
+    const list = slot.querySelector(".absence-list");
     const item = document.createElement("div");
     item.classList.add("absence-item");
 
