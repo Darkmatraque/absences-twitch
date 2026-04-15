@@ -1,9 +1,14 @@
-console.log("CALENDAR JS LOADED"); // 🔥 DEBUG : vérifie que ton JS est chargé
+console.log("CALENDAR JS LOADED");
 
-// --- Récupération de l'utilisateur courant ---
+// --- Récupération de l'utilisateur connecté ---
 const currentUser = JSON.parse(localStorage.getItem("twitchUser"));
 if (!currentUser) {
   console.error("Aucun utilisateur trouvé dans localStorage.");
+}
+
+// --- Format date propre : YYYY-MM-DD ---
+function getToday() {
+  return new Date().toISOString().split("T")[0];
 }
 
 // --- Génération des créneaux horaires ---
@@ -31,22 +36,22 @@ for (let h = 0; h < 24; h++) {
 
 // --- Fonction pour ajouter / retirer une absence ---
 async function toggleAbsence(hour) {
-  const today = new Date().toLocaleDateString("fr-CA"); // 🔥 DATE FIX
+  const today = getToday();
 
-  // Récupérer l'absence de CET utilisateur à CETTE heure
+  // Vérifier si l'absence existe déjà
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("id")
-    .eq("user_id", currentUser.id)
-    .eq("hour", hour)
-    .eq("date", today);
+    .eq("user_id", currentUser.id)   // 🔥 ID Twitch correct
+    .eq("date", today)
+    .eq("hour", hour);
 
   if (selectError) {
     console.error("Erreur SELECT :", selectError);
     return;
   }
 
-  // --- Si l'utilisateur est déjà absent → supprimer ---
+  // --- Si l'absence existe → supprimer ---
   if (rows.length > 0) {
     const { error: deleteError } = await db
       .from("absences")
@@ -57,6 +62,8 @@ async function toggleAbsence(hour) {
       console.error("Erreur DELETE :", deleteError);
       return;
     }
+
+    console.log("Absence supprimée !");
   }
 
   // --- Sinon → ajouter ---
@@ -73,6 +80,8 @@ async function toggleAbsence(hour) {
       console.error("Erreur INSERT :", insertError);
       return;
     }
+
+    console.log("Absence ajoutée !");
   }
 
   // Recharger l'affichage
@@ -81,7 +90,7 @@ async function toggleAbsence(hour) {
 
 // --- Fonction pour charger toutes les absences du jour ---
 async function loadAbsences() {
-  const today = new Date().toLocaleDateString("fr-CA"); // 🔥 DATE FIX
+  const today = getToday();
 
   // Reset visuel
   document.querySelectorAll(".absence-list").forEach(list => {
