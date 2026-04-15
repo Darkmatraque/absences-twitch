@@ -94,7 +94,6 @@ async function toggleAbsence(hour) {
 async function loadAbsences() {
   const today = getToday();
 
-  // Reset visuel
   document.querySelectorAll(".absence-list").forEach(list => {
     list.innerHTML = "";
   });
@@ -120,7 +119,7 @@ async function loadAbsences() {
 
     item.innerHTML = `
       <img src="${abs.profile_image_url}" class="absence-avatar">
-      <span>${abs.display_name}</span>
+      <span>${abs.display_name || abs.login}</span>
     `;
 
     if (String(abs.twitch_id) === String(currentUser.id)) {
