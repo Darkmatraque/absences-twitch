@@ -9,7 +9,7 @@ if (!currentUser) {
 }
 
 // --------------------------------------------------
-//  FORMATAGE DATE LOCALE (YYYY-MM-DD)
+//  OUTILS DATES (SEMAINE, LUNDI, ETC.)              
 // --------------------------------------------------
 function formatDateLocal(date) {
   const d = new Date(date);
@@ -17,11 +17,23 @@ function formatDateLocal(date) {
   return d.toISOString().split("T")[0];
 }
 
-let currentDate = formatDateLocal(new Date());
+// Retourne le lundi de la semaine de la date donnée
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = dimanche, 1 = lundi, ...
+  const diff = (day === 0 ? -6 : 1 - day); // ramener à lundi
+  d.setDate(d.getDate() + diff);
+  return formatDateLocal(d);
+}
 
-// --------------------------------------------------
-//  FORMATAGE DATE HUMAINE (Mercredi 15 avril)
-// --------------------------------------------------
+// Ajoute des jours à une date (YYYY-MM-DD)
+function addDays(dateString, days) {
+  const d = new Date(dateString + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return formatDateLocal(d);
+}
+
+// Format "Lundi 15 avril" pour une date
 function formatDateHuman(dateString) {
   const date = new Date(dateString + "T00:00:00");
 
@@ -44,70 +56,99 @@ function formatDateHuman(dateString) {
 }
 
 // --------------------------------------------------
-//  AFFICHAGE DE LA DATE
+//  GESTION DE LA SEMAINE COURANTE
 // --------------------------------------------------
-function updateDateDisplay() {
-  const dateEl = document.getElementById("current-date");
-  if (dateEl) dateEl.textContent = formatDateHuman(currentDate);
+let currentWeekStart = getMonday(new Date()); // lundi de la semaine actuelle
+
+function updateWeekDisplay() {
+  const start = currentWeekStart;
+  const end = addDays(start, 6);
+
+  const label = document.getElementById("current-week");
+  if (label) {
+    label.textContent = `${formatDateHuman(start)} → ${formatDateHuman(end)}`;
+  }
+
+  // Mettre à jour les en-têtes de jours
+  const dayHeaders = document.querySelectorAll(".day-header");
+  const joursCourts = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+  dayHeaders.forEach((el, index) => {
+    const date = addDays(start, index);
+    el.textContent = `${joursCourts[index]}\n${date}`;
+  });
 }
 
 // --------------------------------------------------
-//  NAVIGATION ENTRE LES JOURS
+//  NAVIGATION ENTRE LES SEMAINES
 // --------------------------------------------------
-document.getElementById("prev-day")?.addEventListener("click", () => {
-  const d = new Date(currentDate);
-  d.setDate(d.getDate() - 1);
-  currentDate = formatDateLocal(d);
-  updateDateDisplay();
-  loadAbsences();
+document.getElementById("prev-week")?.addEventListener("click", () => {
+  currentWeekStart = addDays(currentWeekStart, -7);
+  updateWeekDisplay();
+  generateCalendarGrid();
+  loadAbsencesWeek();
 });
 
-document.getElementById("next-day")?.addEventListener("click", () => {
-  const d = new Date(currentDate);
-  d.setDate(d.getDate() + 1);
-  currentDate = formatDateLocal(d);
-  updateDateDisplay();
-  loadAbsences();
+document.getElementById("next-week")?.addEventListener("click", () => {
+  currentWeekStart = addDays(currentWeekStart, 7);
+  updateWeekDisplay();
+  generateCalendarGrid();
+  loadAbsencesWeek();
 });
 
 // --------------------------------------------------
-//  GÉNÉRATION DU CALENDRIER (24H)
+//  GÉNÉRATION DE LA GRILLE HEBDOMADAIRE (24H x 7J)
 // --------------------------------------------------
 const calendar = document.getElementById("calendar");
 
-function generateCalendar() {
+function generateCalendarGrid() {
   calendar.innerHTML = "";
 
-  for (let h = 0; h < 24; h++) {
-    const slot = document.createElement("div");
-    slot.classList.add("time-slot");
-    slot.dataset.hour = h;
+  for (let hour = 0; hour < 24; hour++) {
+    // Colonne heure
+    const hourCell = document.createElement("div");
+    hourCell.classList.add("hour-label");
+    hourCell.textContent = `${String(hour).padStart(2, "0")}:00`;
+    calendar.appendChild(hourCell);
 
-    const label = document.createElement("div");
-    label.classList.add("hour-label");
-    label.textContent = `${String(h).padStart(2, "0")}:00`;
+    // 7 colonnes jour
+    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+      const date = addDays(currentWeekStart, dayIndex);
 
-    const list = document.createElement("div");
-    list.classList.add("absence-list");
+      const slot = document.createElement("div");
+      slot.classList.add("day-slot");
+      slot.dataset.date = date;
+      slot.dataset.hour = hour;
 
-    slot.appendChild(label);
-    slot.appendChild(list);
+      slot.addEventListener("click", () => toggleAbsence(date, hour));
 
-    slot.addEventListener("click", () => toggleAbsence(h));
-
-    calendar.appendChild(slot);
+      calendar.appendChild(slot);
+    }
   }
+}
+
+// --------------------------------------------------
+//  COULEUR PAR UTILISATEUR (HASH SIMPLE → HSL)
+// --------------------------------------------------
+function getColorForUser(userId) {
+  let hash = 0;
+  const str = String(userId);
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 75%, 60%)`;
 }
 
 // --------------------------------------------------
 //  AJOUT / SUPPRESSION D'UNE ABSENCE
 // --------------------------------------------------
-async function toggleAbsence(hour) {
+async function toggleAbsence(date, hour) {
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("*")
     .eq("user_id", currentUser.id)
-    .eq("date", currentDate)
+    .eq("date", date)
     .eq("hour", hour);
 
   if (selectError) {
@@ -116,7 +157,7 @@ async function toggleAbsence(hour) {
   }
 
   // --- SUPPRESSION ---
-  if (rows.length > 0) {
+  if (rows && rows.length > 0) {
     const { error: deleteError } = await db
       .from("absences")
       .delete()
@@ -137,7 +178,7 @@ async function toggleAbsence(hour) {
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
       hour: hour,
-      date: currentDate
+      date: date
     });
 
     if (insertError) {
@@ -148,52 +189,64 @@ async function toggleAbsence(hour) {
     console.log("Absence ajoutée !");
   }
 
-  loadAbsences();
+  loadAbsencesWeek();
 }
 
 // --------------------------------------------------
-//  CHARGEMENT DES ABSENCES DU JOUR
+//  CHARGEMENT DES ABSENCES DE LA SEMAINE
 // --------------------------------------------------
-async function loadAbsences() {
-  document.querySelectorAll(".absence-list").forEach(list => {
-    list.innerHTML = "";
+async function loadAbsencesWeek() {
+  // Reset visuel
+  document.querySelectorAll(".day-slot").forEach(slot => {
+    slot.innerHTML = "";
   });
+
+  const start = currentWeekStart;
+  const end = addDays(start, 6);
 
   const { data, error } = await db
     .from("absences")
     .select("*")
-    .eq("date", currentDate);
+    .gte("date", start)
+    .lte("date", end);
 
   if (error) {
-    console.error("Erreur loadAbsences:", error);
+    console.error("Erreur loadAbsencesWeek:", error);
     return;
   }
 
-  data.forEach(abs => {
-    const slot = document.querySelector(`.time-slot[data-hour="${abs.hour}"]`);
-    if (!slot) return;
+  if (!data) return;
 
-    const list = slot.querySelector(".absence-list");
+  data.forEach(abs => {
+    const slot = document.querySelector(
+      `.day-slot[data-date="${abs.date}"][data-hour="${abs.hour}"]`
+    );
+    if (!slot) return;
 
     const item = document.createElement("div");
     item.classList.add("absence-item");
 
+    const color = getColorForUser(abs.user_id);
+
     item.innerHTML = `
       <img src="${abs.avatar}" class="absence-avatar">
       <span>${abs.username}</span>
+      <span class="absence-badge" style="background:${color}22; color:${color}; border:1px solid ${color};">
+        ABSENT
+      </span>
     `;
 
     if (String(abs.user_id) === String(currentUser.id)) {
       item.classList.add("me");
     }
 
-    list.appendChild(item);
+    slot.appendChild(item);
   });
 }
 
 // --------------------------------------------------
 //  INITIALISATION
 // --------------------------------------------------
-generateCalendar();
-updateDateDisplay();
-loadAbsences();
+updateWeekDisplay();
+generateCalendarGrid();
+loadAbsencesWeek();
