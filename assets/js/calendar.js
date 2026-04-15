@@ -37,12 +37,13 @@ for (let h = 0; h < 24; h++) {
 // --- Fonction pour ajouter / retirer une absence ---
 async function toggleAbsence(hour) {
   const today = getToday();
+  const twitchId = String(currentUser.id); // 🔥 IMPORTANT
 
   // Vérifier si l'absence existe déjà
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("id")
-    .eq("user_id", currentUser.id)
+    .eq("twitch_id", twitchId)
     .eq("date", today)
     .eq("hour", hour);
 
@@ -69,9 +70,10 @@ async function toggleAbsence(hour) {
   // --- Sinon → ajouter ---
   else {
     const { error: insertError } = await db.from("absences").insert({
-      user_id: currentUser.id,
-      username: currentUser.display_name || currentUser.login,
-      avatar: currentUser.profile_image_url,
+      twitch_id: twitchId,
+      login: currentUser.login,
+      display_name: currentUser.display_name,
+      profile_image_url: currentUser.profile_image_url,
       hour: hour,
       date: today
     });
@@ -117,11 +119,11 @@ async function loadAbsences() {
     item.classList.add("absence-item");
 
     item.innerHTML = `
-      <img src="${abs.avatar}" class="absence-avatar">
-      <span>${abs.username}</span>
+      <img src="${abs.profile_image_url}" class="absence-avatar">
+      <span>${abs.display_name}</span>
     `;
 
-    if (abs.user_id === currentUser.id) {
+    if (String(abs.twitch_id) === String(currentUser.id)) {
       item.classList.add("me");
     }
 
