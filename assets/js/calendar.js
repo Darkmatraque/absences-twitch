@@ -1,17 +1,16 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Calendrier des absences</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body>
+const calendar = document.getElementById("calendar");
 
-  <h1>Calendrier des absences</h1>
+// Génère les heures de 00:00 à 23:00
+for (let h = 0; h < 24; h++) {
+  const hourBlock = document.createElement("div");
+  hourBlock.classList.add("hour");
 
-  <div class="calendar-container" id="calendar"></div>
+  const formatted = h.toString().padStart(2, "0") + ":00";
+  hourBlock.textContent = formatted;
 
-  <script src="../assets/js/calendar.js"></script>
+  hourBlock.addEventListener("click", () => {
+    hourBlock.classList.toggle("selected");
+  });
 
-</body>
-</html>
+  calendar.appendChild(hourBlock);
+}
