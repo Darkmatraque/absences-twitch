@@ -1,7 +1,7 @@
 // Récupération de l'utilisateur courant
 const currentUser = JSON.parse(localStorage.getItem("twitchUser"));
 if (!currentUser) {
-  console.error("Aucun utilisateur trouvé dans localStorage (twitchUser).");
+  console.error("Aucun utilisateur trouvé dans localStorage.");
 }
 
 // Génération des créneaux horaires
@@ -29,12 +29,10 @@ for (let h = 0; h < 24; h++) {
 
 // Clique sur un créneau
 async function toggleAbsence(hour) {
-  if (!currentUser) return;
-
   const today = new Date().toISOString().slice(0, 10);
 
-  // Est-ce que CET utilisateur est déjà absent à CETTE heure ?
-  const { data: existing, error: selectError } = await supabase
+  // Vérifier si CET utilisateur est déjà absent à CETTE heure
+  const { data: existing, error: selectError } = await db
     .from("absences")
     .select("*")
     .eq("user_id", currentUser.id)
@@ -47,9 +45,9 @@ async function toggleAbsence(hour) {
     return;
   }
 
-  // Si déjà absent → on supprime SA ligne
+  // Si déjà absent → supprimer SA ligne
   if (existing) {
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await db
       .from("absences")
       .delete()
       .eq("id", existing.id);
@@ -59,8 +57,8 @@ async function toggleAbsence(hour) {
       return;
     }
   } else {
-    // Sinon → on ajoute
-    const { error: insertError } = await supabase.from("absences").insert({
+    // Sinon → ajouter
+    const { error: insertError } = await db.from("absences").insert({
       user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
@@ -74,7 +72,7 @@ async function toggleAbsence(hour) {
     }
   }
 
-  // On recharge tout l'affichage après chaque action
+  // On recharge tout l'affichage
   await loadAbsences();
 }
 
@@ -87,7 +85,7 @@ async function loadAbsences() {
     list.innerHTML = "";
   });
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("absences")
     .select("*")
     .eq("date", today);
@@ -102,6 +100,7 @@ async function loadAbsences() {
     if (!slot) return;
 
     const list = slot.querySelector(".absence-list");
+
     const item = document.createElement("div");
     item.classList.add("absence-item");
 
