@@ -1,3 +1,7 @@
+/* ------------------------------ */
+/*        STYLE GLOBAL            */
+/* ------------------------------ */
+
 body {
   background: #0a0a0f;
   color: #fff;
@@ -6,24 +10,39 @@ body {
   padding: 0;
 }
 
+/* ------------------------------ */
+/*            TITRE               */
+/* ------------------------------ */
+
 h1 {
   text-align: center;
   margin-top: 30px;
   color: #ff4fd8;
   text-shadow: 0 0 15px #ff4fd8;
+  font-size: 32px;
+  letter-spacing: 1px;
 }
+
+/* ------------------------------ */
+/*      CONTENEUR CALENDRIER      */
+/* ------------------------------ */
 
 .calendar-container {
   width: 90%;
   max-width: 900px;
   margin: 40px auto;
   background: #14141c;
-  padding: 20px;
+  padding: 25px;
   border-radius: 12px;
   box-shadow: 0 0 25px #ff4fd8aa;
 }
 
-.hour {
+/* ------------------------------ */
+/*        CRÉNEAUX HORAIRES       */
+/* ------------------------------ */
+
+.hour,
+.time-slot {
   padding: 12px;
   margin: 6px 0;
   border-radius: 8px;
@@ -31,16 +50,58 @@ h1 {
   cursor: pointer;
   transition: 0.2s;
   border: 1px solid #ff4fd833;
+  font-size: 18px;
 }
 
-.hour:hover {
+.hour:hover,
+.time-slot:hover {
   background: #ff4fd822;
   box-shadow: 0 0 10px #ff4fd8;
 }
 
-.hour.selected {
+/* ------------------------------ */
+/*      ÉTAT : ABSENCE            */
+/* ------------------------------ */
+
+.time-slot.absent {
   background: #ff4fd8;
   color: #000;
   font-weight: bold;
   box-shadow: 0 0 15px #ff4fd8;
+  border-color: #ff4fd8;
+}
+
+/* Bloc interne quand absent */
+.absence-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.absence-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+/* ------------------------------ */
+/*      HEADER UTILISATEUR        */
+/* ------------------------------ */
+
+#user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px;
+}
+
+#user-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+#username {
+  font-size: 20px;
+  font-weight: bold;
 }
