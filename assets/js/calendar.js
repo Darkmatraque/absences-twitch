@@ -1,16 +1,35 @@
+// Génération des créneaux horaires
 const calendar = document.getElementById("calendar");
 
-// Génère les heures de 00:00 à 23:00
 for (let h = 0; h < 24; h++) {
-  const hourBlock = document.createElement("div");
-  hourBlock.classList.add("hour");
+  const slot = document.createElement("div");
+  slot.classList.add("time-slot");
+  slot.dataset.hour = h;
+  slot.textContent = (h < 10 ? "0" : "") + h + ":00";
 
-  const formatted = h.toString().padStart(2, "0") + ":00";
-  hourBlock.textContent = formatted;
+  slot.addEventListener("click", () => toggleAbsence(slot));
 
-  hourBlock.addEventListener("click", () => {
-    hourBlock.classList.toggle("selected");
-  });
+  calendar.appendChild(slot);
+}
 
-  calendar.appendChild(hourBlock);
+// Fonction pour marquer / dé-marquer une absence
+function toggleAbsence(slot) {
+  const user = JSON.parse(localStorage.getItem("twitchUser"));
+  if (!user) return;
+
+  // Si déjà absent → on enlève
+  if (slot.classList.contains("absent")) {
+    slot.classList.remove("absent");
+    slot.innerHTML = slot.dataset.hour.padStart(2, "0") + ":00";
+    return;
+  }
+
+  // Sinon → on marque absent
+  slot.classList.add("absent");
+  slot.innerHTML = `
+    <div class="absence-block">
+      <img src="${user.profile_image_url}" class="absence-avatar">
+      <span>${user.display_name || user.login} — Absent</span>
+    </div>
+  `;
 }
