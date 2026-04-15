@@ -42,7 +42,7 @@ async function toggleAbsence(hour) {
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("id")
-    .eq("user_id", currentUser.id)   // 🔥 ID Twitch correct
+    .eq("user_id", currentUser.id)
     .eq("date", today)
     .eq("hour", hour);
 
