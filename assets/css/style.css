@@ -130,12 +130,20 @@ h1 {
 .calendar-grid {
   display: grid;
   grid-template-columns: 80px repeat(7, 1fr);
-  grid-auto-rows: auto;        /* 🔥 toute la ligne s'adapte */
+  grid-auto-rows: auto;        /* 🔥 toute la ligne suit la hauteur */
   border-radius: 0 0 10px 10px;
   border: 1px solid #2f2f45;
   background: #11111a;
+
   overflow-y: auto;
+  overflow-x: hidden;          /* 🔥 empêche le scroll horizontal */
+  width: 100%;
+  box-sizing: border-box;
   max-height: 650px;
+}
+
+.calendar-grid > div {
+  min-width: 0;                /* 🔥 empêche les débordements */
 }
 
 /* Colonne des heures */
