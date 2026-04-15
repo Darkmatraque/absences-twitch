@@ -31,33 +31,32 @@ for (let h = 0; h < 24; h++) {
 async function toggleAbsence(hour) {
   const today = new Date().toISOString().slice(0, 10);
 
-  // Vérifier si CET utilisateur est déjà absent à CETTE heure
-  const { data: existing, error: selectError } = await db
+  // On récupère TOUTES les absences de CET utilisateur à CETTE heure
+  const { data: rows, error: selectError } = await db
     .from("absences")
-    .select("*")
+    .select("id")
     .eq("user_id", currentUser.id)
     .eq("hour", hour)
-    .eq("date", today)
-    .maybeSingle();
+    .eq("date", today);
 
-  if (selectError && selectError.code !== "PGRST116") {
+  if (selectError) {
     console.error("Erreur SELECT :", selectError);
     return;
   }
 
-  // Si déjà absent → supprimer SA ligne
-  if (existing) {
+  // Si une ligne existe → on supprime
+  if (rows.length > 0) {
     const { error: deleteError } = await db
       .from("absences")
       .delete()
-      .eq("id", existing.id);
+      .eq("id", rows[0].id);
 
     if (deleteError) {
       console.error("Erreur DELETE :", deleteError);
       return;
     }
   } else {
-    // Sinon → ajouter
+    // Sinon → on ajoute
     const { error: insertError } = await db.from("absences").insert({
       user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
