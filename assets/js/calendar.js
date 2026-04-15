@@ -1,61 +1,97 @@
 console.log("CALENDAR JS LOADED");
 
-// --- Récupération de l'utilisateur connecté ---
+// --------------------------------------------------
+//  UTILISATEUR CONNECTÉ
+// --------------------------------------------------
 const currentUser = JSON.parse(localStorage.getItem("twitchUser"));
 if (!currentUser) {
   console.error("Aucun utilisateur trouvé dans localStorage.");
 }
 
-// --- Date locale sans décalage (important pour DELETE) ---
-function getToday() {
-  const d = new Date();
+// --------------------------------------------------
+//  GESTION DE LA DATE COURANTE
+// --------------------------------------------------
+function formatDateLocal(date) {
+  const d = new Date(date);
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
   return d.toISOString().split("T")[0];
 }
 
-// --- Génération des créneaux horaires ---
-const calendar = document.getElementById("calendar");
+let currentDate = formatDateLocal(new Date());
 
-for (let h = 0; h < 24; h++) {
-  const slot = document.createElement("div");
-  slot.classList.add("time-slot");
-  slot.dataset.hour = h;
-
-  const label = document.createElement("div");
-  label.classList.add("hour-label");
-  label.textContent = String(h).padStart(2, "0") + ":00";
-
-  const list = document.createElement("div");
-  list.classList.add("absence-list");
-
-  slot.appendChild(label);
-  slot.appendChild(list);
-
-  slot.addEventListener("click", () => toggleAbsence(h));
-
-  calendar.appendChild(slot);
+// --------------------------------------------------
+//  AFFICHAGE DE LA DATE
+// --------------------------------------------------
+function updateDateDisplay() {
+  const dateEl = document.getElementById("current-date");
+  if (dateEl) dateEl.textContent = currentDate;
 }
 
-// --- Ajouter / retirer une absence ---
-async function toggleAbsence(hour) {
-  const today = getToday();
+// --------------------------------------------------
+//  NAVIGATION ENTRE LES JOURS
+// --------------------------------------------------
+document.getElementById("prev-day")?.addEventListener("click", () => {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() - 1);
+  currentDate = formatDateLocal(d);
+  updateDateDisplay();
+  loadAbsences();
+});
 
-  // Vérifier si l'absence existe déjà
+document.getElementById("next-day")?.addEventListener("click", () => {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() + 1);
+  currentDate = formatDateLocal(d);
+  updateDateDisplay();
+  loadAbsences();
+});
+
+// --------------------------------------------------
+//  GÉNÉRATION DU CALENDRIER (24H)
+// --------------------------------------------------
+const calendar = document.getElementById("calendar");
+
+function generateCalendar() {
+  calendar.innerHTML = "";
+
+  for (let h = 0; h < 24; h++) {
+    const slot = document.createElement("div");
+    slot.classList.add("time-slot");
+    slot.dataset.hour = h;
+
+    const label = document.createElement("div");
+    label.classList.add("hour-label");
+    label.textContent = `${String(h).padStart(2, "0")}:00`;
+
+    const list = document.createElement("div");
+    list.classList.add("absence-list");
+
+    slot.appendChild(label);
+    slot.appendChild(list);
+
+    slot.addEventListener("click", () => toggleAbsence(h));
+
+    calendar.appendChild(slot);
+  }
+}
+
+// --------------------------------------------------
+//  AJOUT / SUPPRESSION D'UNE ABSENCE
+// --------------------------------------------------
+async function toggleAbsence(hour) {
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("*")
     .eq("user_id", currentUser.id)
-    .eq("date", today)
+    .eq("date", currentDate)
     .eq("hour", hour);
-
-  console.log("SELECT rows:", rows);
 
   if (selectError) {
     console.error("Erreur SELECT :", selectError);
     return;
   }
 
-  // --- Si l'absence existe → supprimer ---
+  // --- SUPPRESSION ---
   if (rows.length > 0) {
     const { error: deleteError } = await db
       .from("absences")
@@ -70,14 +106,14 @@ async function toggleAbsence(hour) {
     console.log("Absence supprimée !");
   }
 
-  // --- Sinon → ajouter ---
+  // --- AJOUT ---
   else {
     const { error: insertError } = await db.from("absences").insert({
       user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
       hour: hour,
-      date: today
+      date: currentDate
     });
 
     if (insertError) {
@@ -88,14 +124,13 @@ async function toggleAbsence(hour) {
     console.log("Absence ajoutée !");
   }
 
-  await loadAbsences();
+  loadAbsences();
 }
 
-// --- Charger les absences du jour ---
+// --------------------------------------------------
+//  CHARGEMENT DES ABSENCES DU JOUR
+// --------------------------------------------------
 async function loadAbsences() {
-  const today = getToday();
-
-  // Reset visuel
   document.querySelectorAll(".absence-list").forEach(list => {
     list.innerHTML = "";
   });
@@ -103,7 +138,7 @@ async function loadAbsences() {
   const { data, error } = await db
     .from("absences")
     .select("*")
-    .eq("date", today);
+    .eq("date", currentDate);
 
   if (error) {
     console.error("Erreur loadAbsences:", error);
@@ -132,4 +167,9 @@ async function loadAbsences() {
   });
 }
 
+// --------------------------------------------------
+//  INITIALISATION
+// --------------------------------------------------
+generateCalendar();
+updateDateDisplay();
 loadAbsences();
