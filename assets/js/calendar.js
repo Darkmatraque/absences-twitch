@@ -42,12 +42,13 @@ async function toggleAbsence(hour) {
 
   // Vérifier si l'absence existe déjà
   const { data: rows, error: selectError } = await db
-    console.log("SELECT rows:", rows);
     .from("absences")
-    .select("id")
+    .select("*")
     .eq("user_id", currentUser.id)
     .eq("date", today)
     .eq("hour", hour);
+
+  console.log("SELECT rows:", rows);
 
   if (selectError) {
     console.error("Erreur SELECT :", selectError);
