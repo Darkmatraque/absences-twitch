@@ -17,10 +17,10 @@ function formatDateLocal(date) {
   return d.toISOString().split("T")[0];
 }
 
-// Retourne le lundi de la semaine de la date donnée
+// Retourne le lundi de la semaine
 function getMonday(date) {
   const d = new Date(date);
-  const day = d.getDay(); // 0 = dimanche, 1 = lundi...
+  const day = d.getDay();
   const diff = (day === 0 ? -6 : 1 - day);
   d.setDate(d.getDate() + diff);
   return formatDateLocal(d);
@@ -33,22 +33,17 @@ function addDays(dateString, days) {
   return formatDateLocal(d);
 }
 
-// Format "Lundi 15 avril"
-function formatDateHuman(dateString) {
+// Format "13 Avr"
+function formatShortDate(dateString) {
   const date = new Date(dateString + "T00:00:00");
 
-  const jours = [
-    "Dimanche", "Lundi", "Mardi", "Mercredi",
-    "Jeudi", "Vendredi", "Samedi"
-  ];
-
   const mois = [
-    "janvier", "février", "mars", "avril",
-    "mai", "juin", "juillet", "août",
-    "septembre", "octobre", "novembre", "décembre"
+    "Jan", "Fév", "Mar", "Avr",
+    "Mai", "Juin", "Juil", "Aoû",
+    "Sep", "Oct", "Nov", "Déc"
   ];
 
-  return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
+  return `${date.getDate()} ${mois[date.getMonth()]}`;
 }
 
 // --------------------------------------------------
@@ -62,16 +57,16 @@ function updateWeekDisplay() {
 
   const label = document.getElementById("current-week");
   if (label) {
-    label.textContent = `${formatDateHuman(start)} → ${formatDateHuman(end)}`;
+    label.textContent = `${formatShortDate(start)} → ${formatShortDate(end)}`;
   }
 
   // Mise à jour des en-têtes
   const dayHeaders = document.querySelectorAll(".day-header");
-  const joursCourts = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+  const joursCourts = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
   dayHeaders.forEach((el, index) => {
     const date = addDays(start, index);
-    el.textContent = `${joursCourts[index]} ${formatDateHuman(date)}`;
+    el.textContent = `${joursCourts[index]} ${formatShortDate(date)}`;
   });
 }
 
@@ -140,31 +135,27 @@ function getColorForUser(userId) {
 //  AJOUT / SUPPRESSION D'ABSENCE
 // --------------------------------------------------
 async function toggleAbsence(date, hour) {
-  const { data: rows, error: selectError } = await db
+  const { data: rows } = await db
     .from("absences")
     .select("*")
     .eq("user_id", currentUser.id)
     .eq("date", date)
     .eq("hour", hour);
 
-  if (selectError) return console.error(selectError);
-
   // SUPPRESSION
   if (rows?.length > 0) {
-    const { error } = await db.from("absences").delete().eq("id", rows[0].id);
-    if (error) return console.error(error);
+    await db.from("absences").delete().eq("id", rows[0].id);
   }
 
   // AJOUT
   else {
-    const { error } = await db.from("absences").insert({
+    await db.from("absences").insert({
       user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
       hour,
       date
     });
-    if (error) return console.error(error);
   }
 
   loadAbsencesWeek();
@@ -181,13 +172,12 @@ async function loadAbsencesWeek() {
   const start = currentWeekStart;
   const end = addDays(start, 6);
 
-  const { data, error } = await db
+  const { data } = await db
     .from("absences")
     .select("*")
     .gte("date", start)
     .lte("date", end);
 
-  if (error) return console.error(error);
   if (!data) return;
 
   data.forEach(abs => {
