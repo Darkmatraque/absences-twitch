@@ -9,7 +9,7 @@ if (!currentUser) {
 }
 
 // --------------------------------------------------
-//  OUTILS DATES (SEMAINE, LUNDI, ETC.)              
+//  OUTILS DATES (SEMAINE, LUNDI, ETC.)
 // --------------------------------------------------
 function formatDateLocal(date) {
   const d = new Date(date);
@@ -20,20 +20,20 @@ function formatDateLocal(date) {
 // Retourne le lundi de la semaine de la date donnée
 function getMonday(date) {
   const d = new Date(date);
-  const day = d.getDay(); // 0 = dimanche, 1 = lundi, ...
-  const diff = (day === 0 ? -6 : 1 - day); // ramener à lundi
+  const day = d.getDay(); // 0 = dimanche, 1 = lundi...
+  const diff = (day === 0 ? -6 : 1 - day);
   d.setDate(d.getDate() + diff);
   return formatDateLocal(d);
 }
 
-// Ajoute des jours à une date (YYYY-MM-DD)
+// Ajoute X jours à une date YYYY-MM-DD
 function addDays(dateString, days) {
   const d = new Date(dateString + "T00:00:00");
   d.setDate(d.getDate() + days);
   return formatDateLocal(d);
 }
 
-// Format "Lundi 15 avril" pour une date
+// Format "Lundi 15 avril"
 function formatDateHuman(dateString) {
   const date = new Date(dateString + "T00:00:00");
 
@@ -48,17 +48,13 @@ function formatDateHuman(dateString) {
     "septembre", "octobre", "novembre", "décembre"
   ];
 
-  const jourSemaine = jours[date.getDay()];
-  const jour = date.getDate();
-  const moisNom = mois[date.getMonth()];
-
-  return `${jourSemaine} ${jour} ${moisNom}`;
+  return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
 }
 
 // --------------------------------------------------
-//  GESTION DE LA SEMAINE COURANTE
+//  SEMAINE COURANTE
 // --------------------------------------------------
-let currentWeekStart = getMonday(new Date()); // lundi de la semaine actuelle
+let currentWeekStart = getMonday(new Date());
 
 function updateWeekDisplay() {
   const start = currentWeekStart;
@@ -69,18 +65,18 @@ function updateWeekDisplay() {
     label.textContent = `${formatDateHuman(start)} → ${formatDateHuman(end)}`;
   }
 
-  // Mettre à jour les en-têtes de jours
+  // Mise à jour des en-têtes
   const dayHeaders = document.querySelectorAll(".day-header");
   const joursCourts = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
   dayHeaders.forEach((el, index) => {
     const date = addDays(start, index);
-    el.textContent = `${joursCourts[index]}\n${date}`;
+    el.textContent = `${joursCourts[index]} ${formatDateHuman(date)}`;
   });
 }
 
 // --------------------------------------------------
-//  NAVIGATION ENTRE LES SEMAINES
+//  NAVIGATION ENTRE SEMAINES
 // --------------------------------------------------
 document.getElementById("prev-week")?.addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, -7);
@@ -97,7 +93,7 @@ document.getElementById("next-week")?.addEventListener("click", () => {
 });
 
 // --------------------------------------------------
-//  GÉNÉRATION DE LA GRILLE HEBDOMADAIRE (24H x 7J)
+//  GÉNÉRATION DE LA GRILLE HEBDOMADAIRE
 // --------------------------------------------------
 const calendar = document.getElementById("calendar");
 
@@ -105,13 +101,13 @@ function generateCalendarGrid() {
   calendar.innerHTML = "";
 
   for (let hour = 0; hour < 24; hour++) {
-    // Colonne heure
+    // Colonne des heures
     const hourCell = document.createElement("div");
     hourCell.classList.add("hour-label");
     hourCell.textContent = `${String(hour).padStart(2, "0")}:00`;
     calendar.appendChild(hourCell);
 
-    // 7 colonnes jour
+    // 7 jours
     for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
       const date = addDays(currentWeekStart, dayIndex);
 
@@ -128,7 +124,7 @@ function generateCalendarGrid() {
 }
 
 // --------------------------------------------------
-//  COULEUR PAR UTILISATEUR (HASH SIMPLE → HSL)
+//  COULEUR PAR UTILISATEUR
 // --------------------------------------------------
 function getColorForUser(userId) {
   let hash = 0;
@@ -141,7 +137,7 @@ function getColorForUser(userId) {
 }
 
 // --------------------------------------------------
-//  AJOUT / SUPPRESSION D'UNE ABSENCE
+//  AJOUT / SUPPRESSION D'ABSENCE
 // --------------------------------------------------
 async function toggleAbsence(date, hour) {
   const { data: rows, error: selectError } = await db
@@ -151,42 +147,24 @@ async function toggleAbsence(date, hour) {
     .eq("date", date)
     .eq("hour", hour);
 
-  if (selectError) {
-    console.error("Erreur SELECT :", selectError);
-    return;
+  if (selectError) return console.error(selectError);
+
+  // SUPPRESSION
+  if (rows?.length > 0) {
+    const { error } = await db.from("absences").delete().eq("id", rows[0].id);
+    if (error) return console.error(error);
   }
 
-  // --- SUPPRESSION ---
-  if (rows && rows.length > 0) {
-    const { error: deleteError } = await db
-      .from("absences")
-      .delete()
-      .eq("id", rows[0].id);
-
-    if (deleteError) {
-      console.error("Erreur DELETE :", deleteError);
-      return;
-    }
-
-    console.log("Absence supprimée !");
-  }
-
-  // --- AJOUT ---
+  // AJOUT
   else {
-    const { error: insertError } = await db.from("absences").insert({
+    const { error } = await db.from("absences").insert({
       user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
-      hour: hour,
-      date: date
+      hour,
+      date
     });
-
-    if (insertError) {
-      console.error("Erreur INSERT :", insertError);
-      return;
-    }
-
-    console.log("Absence ajoutée !");
+    if (error) return console.error(error);
   }
 
   loadAbsencesWeek();
@@ -196,7 +174,6 @@ async function toggleAbsence(date, hour) {
 //  CHARGEMENT DES ABSENCES DE LA SEMAINE
 // --------------------------------------------------
 async function loadAbsencesWeek() {
-  // Reset visuel
   document.querySelectorAll(".day-slot").forEach(slot => {
     slot.innerHTML = "";
   });
@@ -210,11 +187,7 @@ async function loadAbsencesWeek() {
     .gte("date", start)
     .lte("date", end);
 
-  if (error) {
-    console.error("Erreur loadAbsencesWeek:", error);
-    return;
-  }
-
+  if (error) return console.error(error);
   if (!data) return;
 
   data.forEach(abs => {
@@ -223,10 +196,10 @@ async function loadAbsencesWeek() {
     );
     if (!slot) return;
 
+    const color = getColorForUser(abs.user_id);
+
     const item = document.createElement("div");
     item.classList.add("absence-item");
-
-    const color = getColorForUser(abs.user_id);
 
     item.innerHTML = `
       <img src="${abs.avatar}" class="absence-avatar">
