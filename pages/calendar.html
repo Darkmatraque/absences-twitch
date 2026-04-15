@@ -7,9 +7,32 @@
 </head>
 <body>
 
+  <div id="user-info" style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+    <img id="avatar" src="" width="50" style="border-radius:50%; display:none;">
+    <span id="username" style="font-size:20px; font-weight:bold;"></span>
+  </div>
+
   <h1>Calendrier des absences</h1>
 
   <div class="calendar-container" id="calendar"></div>
+
+  <script>
+    // Récupération du user stocké dans localStorage
+    const user = JSON.parse(localStorage.getItem("twitchUser"));
+
+    // Si aucun user → retour à la page de login
+    if (!user) {
+      window.location.href = "index.html";
+    }
+
+    // Affichage du pseudo
+    document.getElementById("username").textContent = user.display_name || user.login;
+
+    // Affichage de l’avatar
+    const avatar = document.getElementById("avatar");
+    avatar.src = user.profile_image_url;
+    avatar.style.display = "block";
+  </script>
 
   <script src="../assets/js/calendar.js"></script>
 
