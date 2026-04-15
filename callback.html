@@ -41,6 +41,7 @@
       const data = await res.json();
       console.log("DATA REÇUE :", data);
 
+      // On récupère le user quel que soit le format renvoyé
       const user = data.user || data.data || data;
 
       document.body.innerHTML = `
