@@ -41,8 +41,10 @@
       const data = await res.json();
       console.log("DATA REÇUE :", data);
 
-      // On récupère le user quel que soit le format renvoyé
       const user = data.user || data.data || data;
+
+      // Stockage du user dans localStorage
+      localStorage.setItem("twitchUser", JSON.stringify(user));
 
       document.body.innerHTML = `
         <h2>Bienvenue ${user.display_name || user.login} !</h2>
@@ -60,4 +62,3 @@
 
 </body>
 </html>
-
