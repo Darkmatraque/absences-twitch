@@ -41,7 +41,7 @@ async function toggleAbsence(hour) {
     .maybeSingle();
 
   if (selectError && selectError.code !== "PGRST116") {
-    console.error("Erreur select:", selectError);
+    console.error("Erreur SELECT :", selectError);
     return;
   }
 
@@ -53,7 +53,7 @@ async function toggleAbsence(hour) {
       .eq("id", existing.id);
 
     if (deleteError) {
-      console.error("Erreur delete:", deleteError);
+      console.error("Erreur DELETE :", deleteError);
       return;
     }
   } else {
@@ -67,7 +67,7 @@ async function toggleAbsence(hour) {
     });
 
     if (insertError) {
-      console.error("Erreur insert:", insertError);
+      console.error("Erreur INSERT :", insertError);
       return;
     }
   }
