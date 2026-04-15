@@ -6,9 +6,11 @@ if (!currentUser) {
   console.error("Aucun utilisateur trouvé dans localStorage.");
 }
 
-// --- Format date propre : YYYY-MM-DD ---
+// --- Date locale sans décalage (important pour DELETE) ---
 function getToday() {
-  return new Date().toISOString().split("T")[0];
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().split("T")[0];
 }
 
 // --- Génération des créneaux horaires ---
@@ -34,7 +36,7 @@ for (let h = 0; h < 24; h++) {
   calendar.appendChild(slot);
 }
 
-// --- Fonction pour ajouter / retirer une absence ---
+// --- Ajouter / retirer une absence ---
 async function toggleAbsence(hour) {
   const today = getToday();
 
@@ -42,7 +44,7 @@ async function toggleAbsence(hour) {
   const { data: rows, error: selectError } = await db
     .from("absences")
     .select("id")
-    .eq("user_id", currentUser.id)   // 🔥 correspond à TA table
+    .eq("user_id", currentUser.id)
     .eq("date", today)
     .eq("hour", hour);
 
@@ -69,7 +71,7 @@ async function toggleAbsence(hour) {
   // --- Sinon → ajouter ---
   else {
     const { error: insertError } = await db.from("absences").insert({
-      user_id: currentUser.id, // 🔥 correspond à TA table
+      user_id: currentUser.id,
       username: currentUser.display_name || currentUser.login,
       avatar: currentUser.profile_image_url,
       hour: hour,
@@ -84,11 +86,10 @@ async function toggleAbsence(hour) {
     console.log("Absence ajoutée !");
   }
 
-  // Recharger l'affichage
   await loadAbsences();
 }
 
-// --- Fonction pour charger toutes les absences du jour ---
+// --- Charger les absences du jour ---
 async function loadAbsences() {
   const today = getToday();
 
